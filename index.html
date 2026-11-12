@@ -86,6 +86,12 @@ dialog{max-width:460px;width:calc(100% - 32px);border:1px solid var(--line);bord
 @media(max-width:760px){.chapter-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.chapter-grid{grid-template-columns:1fr}.chapter-head{flex-direction:column;gap:2px}}
 
+.sec-wrap{display:flex;flex-direction:column;gap:7px}.sec-wrap .section-card{width:100%;flex:1}.sec-review{background:transparent;border:1px dashed var(--line);border-radius:12px;padding:7px 10px;font-size:12.5px;color:var(--green);font-weight:650}.sec-review:hover{background:var(--light)}
+.rv-head{margin:18px 0 8px}.rv-head h1{font-size:34px;margin:0 0 6px}.rv-head p{color:var(--muted);margin:4px 0}.rv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.rv-q{background:var(--white);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:17px;padding:20px 22px;margin:14px 0;box-shadow:0 4px 0 #e6eade}.rv-q.ok{border-left-color:#6c9567}.rv-q.no{border-left-color:var(--red)}
+.rv-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:8px}.rv-badge{font-weight:700;padding:3px 9px;border-radius:99px}.rv-badge.ok{background:#eff6e8;color:#2d5e40}.rv-badge.no{background:#fbe9e6;color:var(--red)}
+.rv-title{font-size:19px;line-height:1.45;margin:4px 0 14px}.rv-you{margin-left:auto;font-size:11.5px;font-weight:700;opacity:.8}
+:root[data-theme="dark"] .rv-q{background:#1c2a24;border-color:#2c3d35}:root[data-theme="dark"] .rv-badge.ok{background:#22382c;color:#a9d6a0}:root[data-theme="dark"] .rv-badge.no{background:#3a2423;color:#f0a39c}
 </style>
 </head>
 <body>
@@ -102,12 +108,15 @@ function filterQuestions(questions,scope='all',marked=[]){
 }
 function resetProgress(db){return {...db,completed:{10:[],20:[]},sessions:{}};}
 function sameSet(a,b){return a.length===b.length&&new Set(a).size===a.length&&a.every(x=>b.includes(x));}
-function begin(ids,section,size){return {section,size,ids:[...ids],queue:[...ids],position:0,retry:[],mastered:[],errors:0,round:1,feedback:null,selected:[],done:false};}
+function begin(ids,section,size){return {section,size,ids:[...ids],queue:[...ids],position:0,retry:[],mastered:[],errors:0,round:1,feedback:null,selected:[],done:false,log:{}};}
 function grade(state,selected,correct){
   if(state.done||state.feedback)return state;
   const next=structuredClone(state),id=state.queue[state.position];
   next.selected=[...selected];
-  if(sameSet(selected,correct)){next.feedback='correct';if(!next.mastered.includes(id))next.mastered.push(id);}
+  const okNow=sameSet(selected,correct);
+  next.log={...(state.log||{})};
+  if(!(id in next.log))next.log[id]={first:[...selected],ok:okNow,tries:1};else next.log[id]={...next.log[id],tries:(next.log[id].tries||1)+1};
+  if(okNow){next.feedback='correct';if(!next.mastered.includes(id))next.mastered.push(id);}
   else{next.feedback='wrong';next.errors+=1;if(!next.retry.includes(id))next.retry.push(id);}
   return next;
 }
@@ -198,7 +207,48 @@ function persist(){if(state){db.sessions[key(state.section,state.size)]=state;sa
 
 /* ---------- âm thanh, giao diện ---------- */
 function unlockAudio(){if(!db.sound)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!audio)audio=new C();if(audio.state==='suspended')audio.resume().catch(()=>{});}catch{}}
-function tone(ok){if(!db.sound)return;unlockAudio();if(!audio)return;try{const start=audio.currentTime;const notes=ok?[[880,0,.13],[1320,.09,.3]]:[[185,0,.19]];for(const [freq,delay,duration]of notes){const osc=audio.createOscillator(),g=audio.createGain();osc.type=ok?'sine':'triangle';osc.frequency.value=freq;g.gain.setValueAtTime(0,start+delay);g.gain.linearRampToValueAtTime(.12,start+delay+.01);g.gain.exponentialRampToValueAtTime(.001,start+delay+duration);osc.connect(g);g.connect(audio.destination);osc.start(start+delay);osc.stop(start+delay+duration+.02);}}catch{}}
+let streak=0;
+function note(freq,at,dur,type='sine',vol=.1){const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+.012);g.gain.exponentialRampToValueAtTime(.001,at+dur);o.connect(g);g.connect(audio.destination);o.start(at);o.stop(at+dur+.03);}
+function tone(ok){
+  if(!db.sound)return;unlockAudio();if(!audio)return;
+  try{
+    const t=audio.currentTime;
+    if(ok){
+      streak=Math.min(streak+1,8);
+      const scale=[523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.51],r=scale[streak-1];
+      [[1,0],[1.25,.07],[1.5,.14],[2,.21]].forEach(([m,d])=>{note(r*m,t+d,.34,'triangle',.1);note(r*m*2,t+d,.22,'sine',.035);});
+      note(r*4,t+.32,.5,'sine',.045);note(r*3,t+.4,.45,'sine',.03);
+      if(streak>=3){note(r*2,t+.28,.6,'triangle',.07);}
+    }else{
+      streak=0;
+      note(233,t,.2,'sawtooth',.06);note(185,t+.15,.22,'sawtooth',.06);note(147,t+.3,.45,'triangle',.08);note(98,t+.3,.5,'sine',.07);
+    }
+  }catch{}
+}
+function fanfare(){
+  if(!db.sound)return;unlockAudio();if(!audio)return;
+  try{
+    const t=audio.currentTime;
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>note(f,t+i*.11,.3,'triangle',.11));
+    [523.25,659.25,783.99,1046.5,1318.51].forEach(f=>note(f,t+.55,1.1,'triangle',.07));
+    [2093,2637,3136,2637,3136,4186].forEach((f,i)=>note(f,t+.62+i*.09,.35,'sine',.035));
+  }catch{}
+}
+function confetti(){
+  try{
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const colors=['#da7347','#2e6248','#e9b887','#7fb069','#ac413b','#f2c14e'],layer=document.createElement('div');
+    layer.setAttribute('aria-hidden','true');layer.style.cssText='position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50';
+    for(let i=0;i<70;i++){
+      const p=document.createElement('i'),x=Math.random()*100,s=6+Math.random()*7;
+      p.style.cssText=`position:absolute;left:${x}vw;top:-12px;width:${s}px;height:${s*1.6}px;background:${colors[i%colors.length]};border-radius:2px`;
+      layer.appendChild(p);
+      p.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:`translate(${(Math.random()-.5)*240}px,${innerHeight+40}px) rotate(${360+Math.random()*540}deg)`,opacity:.9}],{duration:1600+Math.random()*1400,delay:Math.random()*350,easing:'cubic-bezier(.2,.7,.4,1)',fill:'forwards'});
+    }
+    document.body.appendChild(layer);setTimeout(()=>layer.remove(),3800);
+  }catch{}
+}
+/* ---------- âm thanh, giao diện (tiếp) ---------- */
 function themeUI(){const dark=document.documentElement.dataset.theme==='dark';$('theme').innerHTML=`<span class="theme-symbol" aria-hidden="true">${dark?'☀':'☾'}</span><span class="theme-label">${dark?'Sáng':'Tối'}</span>`;$('theme').setAttribute('aria-pressed',String(dark));$('theme').setAttribute('aria-label',dark?'Bật chế độ sáng':'Bật chế độ tối');$('theme').title=dark?'Bật chế độ sáng':'Bật chế độ tối';}
 $('theme').onclick=()=>{window.nhipTheme.set(document.documentElement.dataset.theme==='dark'?'light':'dark');themeUI();};
 window.addEventListener('nhip-theme-change',themeUI);
@@ -221,7 +271,8 @@ function sectionGrid(list,next){
     const secs=list.filter(s=>s.chapter===ch),count=secs.reduce((a,s)=>a+s.ids.length,0);
     return `<div class="chapter-head"><h3>Chương ${ch} · ${escapeHTML(chapterMeta(ch).short)}</h3><span>${count} câu · ${secs.length} phần</span></div><div class="section-grid">${secs.map(s=>{
       const completed=isDone(s),sess=db.sessions[key(s.sig)],active=sess&&!sess.done;
-      return `<button class="section-card ${completed?'completed':s.sig===next.sig?'current':''}" data-sig="${s.sig}"><span class="topline">CHƯƠNG ${s.chapter}<span class="section-icon" aria-hidden="true">${completed?'✓':active?'◔':'↗'}</span></span><strong>Phần ${s.part}</strong><small>Câu ${s.from}–${s.to} · ${s.ids.length} câu</small><span class="status">${active?`Đang học · ${sess.mastered.length}/${sess.ids.length}`:completed?'Đã hoàn thành':s.sig===next.sig?'Sẵn sàng bắt đầu':'Chưa bắt đầu'}</span></button>`;}).join('')}</div>`;
+      const canReview=Boolean(sess&&sess.log&&Object.keys(sess.log).length)||completed;
+      return `<div class="sec-wrap"><button class="section-card ${completed?'completed':s.sig===next.sig?'current':''}" data-sig="${s.sig}"><span class="topline">CHƯƠNG ${s.chapter}<span class="section-icon" aria-hidden="true">${completed?'✓':active?'◔':'↗'}</span></span><strong>Phần ${s.part}</strong><small>Câu ${s.from}–${s.to} · ${s.ids.length} câu</small><span class="status">${active?`Đang học · ${sess.mastered.length}/${sess.ids.length}`:completed?'Đã hoàn thành':s.sig===next.sig?'Sẵn sàng bắt đầu':'Chưa bắt đầu'}</span></button>${canReview?`<button class="sec-review" data-review="${s.sig}" type="button">👁 Xem lại câu đã làm</button>`:''}</div>`;}).join('')}</div>`;
   }).join('');
 }
 function home(){
@@ -238,6 +289,7 @@ function home(){
   app.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{db.scope=b.dataset.scope;save();home();});
   if($('start'))$('start').onclick=()=>start(next.sig);
   app.querySelectorAll('[data-sig]').forEach(b=>b.onclick=()=>start(b.dataset.sig));
+  app.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>secReview(b.dataset.review));
   app.querySelectorAll('[data-size]').forEach(b=>b.onclick=()=>{db.size=Number(b.dataset.size);save();home();});
   $('review').onclick=()=>{reviewPending=false;review();};
   $('reset-all').onclick=()=>{$('reset-dialog').showModal();};
@@ -246,7 +298,7 @@ function home(){
 
 /* ---------- học ---------- */
 function start(sig,reset=false){
-  cancel();hold=false;unlockAudio();view='study';
+  cancel();hold=false;unlockAudio();view='study';streak=0;
   const s=findSection(sig);if(!s){home();return;}
   const saved=db.sessions[key(sig)];
   if(saved&&!reset){state=structuredClone(saved);}
@@ -298,16 +350,38 @@ function submit(){
 function goNext(){
   cancel();hold=false;if(!state||!state.feedback)return;
   const round=state.round;state=advance(state);persist();
-  if(state.done){if(!isDone({sig:state.section},state.size))db.completed[state.size].push(state.section);save();summary();}
+  if(state.done){if(!isDone({sig:state.section},state.size))db.completed[state.size].push(state.section);save();summary(true);}
   else{renderQuestion();top();if(state.round!==round)say(`Học lại ${state.queue.length} câu chưa đúng.`);}
 }
-function summary(){
+function summary(celebrate=false){
   cancel();view='summary';
   if(!db.completed[state.size].includes(state.section)){db.completed[state.size].push(state.section);save();}
   const list=sections(),i=list.findIndex(s=>s.sig===state.section),nxt=i>=0?list[i+1]:null;
-  app.innerHTML=`<div class="learn-top"><button class="back" id="home">← Các phần ôn tập</button><span class="pill">Hoàn thành ${sectionLabel(state)}</span></div><section class="summary-card"><div class="medallion" aria-hidden="true">✓</div><div class="eyebrow" style="justify-content:center">Thêm một bước tiến</div><h1>Bạn đã nắm được phần này.</h1><p>Tất cả ${state.ids.length} câu đã được trả lời đúng.<br>${state.errors?'Những câu chưa đúng cũng đã được bạn chinh phục.':'Một nhịp học thật trọn vẹn.'}</p><div class="summary-metrics"><div><b>${state.ids.length}/${state.ids.length}</b><span>Câu đã đúng</span></div><div><b>${state.errors}</b><span>Lần chọn sai</span></div></div><div class="summary-actions"><button class="secondary" id="redo">↻ Làm lại phần này</button><button class="primary" id="continue">${nxt?(nxt.chapter!==state.chapter?'Sang Chương '+nxt.chapter+' →':'Sang Phần '+nxt.part+' →'):'Về danh sách phần'}</button></div><p style="font-size:12px;margin-top:25px">${memoryOnly?'Tiến độ tạm thời chỉ được giữ trong lần mở này.':'Đã lưu dấu tích hoàn thành trên trình duyệt này.'}</p></section>`;
-  $('home').onclick=home;$('redo').onclick=()=>start(state.section,true);$('continue').onclick=()=>nxt?start(nxt.sig):home();
+  app.innerHTML=`<div class="learn-top"><button class="back" id="home">← Các phần ôn tập</button><span class="pill">Hoàn thành ${sectionLabel(state)}</span></div><section class="summary-card"><div class="medallion" aria-hidden="true">✓</div><div class="eyebrow" style="justify-content:center">Thêm một bước tiến</div><h1>Bạn đã nắm được phần này.</h1><p>Tất cả ${state.ids.length} câu đã được trả lời đúng.<br>${state.errors?'Những câu chưa đúng cũng đã được bạn chinh phục.':'Một nhịp học thật trọn vẹn.'}</p><div class="summary-metrics"><div><b>${state.ids.length}/${state.ids.length}</b><span>Câu đã đúng</span></div><div><b>${state.errors}</b><span>Lần chọn sai</span></div></div><div class="summary-actions"><button class="secondary" id="seerev">👁 Xem lại các câu</button><button class="secondary" id="redo">↻ Làm lại phần này</button><button class="primary" id="continue">${nxt?(nxt.chapter!==state.chapter?'Sang Chương '+nxt.chapter+' →':'Sang Phần '+nxt.part+' →'):'Về danh sách phần'}</button></div><p style="font-size:12px;margin-top:25px">${memoryOnly?'Tiến độ tạm thời chỉ được giữ trong lần mở này.':'Đã lưu dấu tích hoàn thành trên trình duyệt này.'}</p></section>`;
+  $('home').onclick=home;$('seerev').onclick=()=>secReview(state.section);$('redo').onclick=()=>start(state.section,true);
+  if(celebrate){fanfare();confetti();}$('continue').onclick=()=>nxt?start(nxt.sig):home();
   say(`Hoàn thành ${sectionLabel(state)}. ${state.errors} lần chọn sai.`);top();
+}
+
+/* ---------- xem lại một phần ---------- */
+let rvWrongOnly=false;
+function secReview(sig,keepFilter=false){
+  cancel();view='secreview';if(!keepFilter)rvWrongOnly=false;
+  const s=findSection(sig);if(!s){home();return;}
+  const sess=db.sessions[key(sig)],log=(sess&&sess.log)||{},has=Object.keys(log).length>0;
+  const items=s.ids.map(id=>byId.get(id)),wrongOf=q=>has&&log[q.id]&&!log[q.id].ok,answered=items.filter(q=>log[q.id]).length;
+  const firstRight=items.filter(q=>log[q.id]&&log[q.id].ok).length,wrongN=items.filter(wrongOf).length;
+  const shown=rvWrongOnly?items.filter(wrongOf):items;
+  app.innerHTML=`<div class="learn-top"><button class="back" id="home">← Các phần ôn tập</button><span class="pill">Xem lại · ${sectionLabel(s)}</span></div>
+<section class="rv-head"><h1>Xem lại ${sectionLabel(s)}</h1>${has?`<p><b>${firstRight}/${answered}</b> câu đúng ngay lần đầu${wrongN?` · <b>${wrongN}</b> câu từng chọn sai`:' · không sai câu nào 🎉'}</p>`:'<p>Phần này làm trước khi có tính năng xem lại nên chưa lưu lựa chọn của bạn. Dưới đây là đáp án và giải thích; làm lại phần để lưu lại.</p>'}
+<div class="rv-actions">${has&&wrongN?`<button class="secondary ${rvWrongOnly?'active':''}" id="rv-filter" aria-pressed="${rvWrongOnly}">${rvWrongOnly?'Hiện tất cả câu':'Chỉ hiện câu từng sai ('+wrongN+')'}</button>`:''}<button class="secondary" id="rv-redo">↻ Làm lại phần này</button></div></section>
+${shown.length?shown.map(q=>{
+    const l=log[q.id],mine=l?l.first:[],ok=l?l.ok:null;
+    return `<article class="rv-q ${ok===true?'ok':ok===false?'no':''}"><div class="rv-meta"><span>Chương ${q.chapter} · Câu ${q.local}</span>${ok===true?'<span class="rv-badge ok">✓ Đúng ngay lần đầu</span>':ok===false?`<span class="rv-badge no">× Chọn sai lần đầu${l.tries>1?' · '+l.tries+' lượt thử':''}</span>`:''}</div><h2 class="rv-title">${escapeHTML(q.question)}</h2><div class="options">${q.options.map((o,i)=>{const L=String.fromCharCode(65+i),good=q.correct.includes(L),bad=mine.includes(L)&&!good;return `<button class="option ${good?'good':''} ${bad?'bad':''}" disabled><span class="letter">${L}</span><span>${escapeHTML(o)}</span>${good?'<span class="choice-mark" aria-label="Đáp án đúng">✓</span>':bad?'<span class="choice-mark" aria-label="Bạn đã chọn">×</span>':''}${mine.includes(L)&&good?'<span class="rv-you">bạn chọn</span>':bad?'<span class="rv-you">bạn chọn</span>':''}</button>`;}).join('')}</div>${q.review?`<details class="note"><summary>${q.review.status==='pending'?'Cần xác nhận đáp án':'Giải thích & nguồn đối chiếu'}</summary>${reviewEvidence(q)}</details>`:''}</article>`;}).join(''):'<p class="loading">Không có câu nào để hiện.</p>'}
+<div class="summary-actions" style="justify-content:center;margin-top:20px"><button class="primary" id="rv-back">← Về danh sách phần</button></div>`;
+  $('home').onclick=home;$('rv-back').onclick=home;$('rv-redo').onclick=()=>start(sig,true);
+  if($('rv-filter'))$('rv-filter').onclick=()=>{rvWrongOnly=!rvWrongOnly;secReview(sig,true);};
+  top();
 }
 
 /* ---------- đáp án & tài liệu ---------- */
