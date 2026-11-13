@@ -84,7 +84,18 @@ dialog{max-width:460px;width:calc(100% - 32px);border:1px solid var(--line);bord
 .chapter-head span{font-size:12px;color:var(--muted);white-space:nowrap}
 .exam-tag{display:inline-block;padding:2px 9px;border-radius:20px;border:1px solid var(--orange);color:var(--orange);font-size:11px;font-weight:700}
 .review-intro .secondary{margin-top:6px}
-@media(max-width:760px){.chapter-grid{grid-template-columns:repeat(2,1fr)}}
+.fe-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:3px 9px;border-radius:20px;background:var(--light);color:var(--green);font-size:11px;font-weight:700;letter-spacing:.3px}
+.fe-term{margin-top:20px}.fe-term-head{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.fe-term-tag{padding:4px 10px;border-radius:8px;background:var(--green);color:#fff;font-weight:750;font-size:12px;letter-spacing:.5px}
+.fe-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.fe-card{position:relative;text-align:left;display:flex;flex-direction:column;gap:5px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);border-top:3px solid var(--green);background:var(--surface,#fff);box-shadow:0 3px 0 var(--lift,#e6eade);min-height:104px}
+.fe-card:hover{transform:translateY(-2px)}
+.fe-card .fe-kicker{font-size:10px;letter-spacing:1.2px;font-weight:750;color:var(--muted)}
+.fe-card strong{font-size:16px;line-height:1.3}.fe-card small{font-size:12px;color:var(--muted)}
+.fe-card .ch-bar{display:block;height:5px;border-radius:9px;background:var(--light);overflow:hidden;margin-top:auto}.fe-card .ch-bar b{display:block;height:100%;background:var(--green);border-radius:9px}
+.fe-card.active{background:var(--surface-hover,#f0f5e8);border-color:var(--green)}
+@media(max-width:900px){.fe-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.chapter-grid{grid-template-columns:repeat(2,1fr)}.fe-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.chapter-grid{grid-template-columns:1fr}.chapter-head{flex-direction:column;gap:2px}}
 
 .sec-wrap{display:flex;flex-direction:column;gap:7px}.sec-wrap .section-card{width:100%;flex:1}.sec-review{background:transparent;border:1px dashed var(--line);border-radius:12px;padding:7px 10px;font-size:12.5px;color:var(--green);font-weight:650}.sec-review:hover{background:var(--light)}
@@ -267,7 +278,18 @@ function chapterCards(){
     return `<button class="chapter-card ${active?'active':''} ${secs.length&&done===secs.length?'finished':''}" data-scope="${c.n}" aria-pressed="${active}"><span class="ch-no">CHƯƠNG ${c.n}${secs.length&&done===secs.length?' · ✓':''}</span><strong>${escapeHTML(c.short)}</strong><small>${count} câu · ${done}/${secs.length} phần</small><i class="ch-bar"><b style="width:${secs.length?done/secs.length*100:0}%"></b></i></button>`;
   }).join('');
 }
-function examButtons(){return `<div style="flex-basis:100%;font-size:13px;color:var(--muted);margin:6px 0 2px">Theo đề thi (mỗi đề vẫn chia theo chương):</div>`+data.meta.exams.map(e=>`<button class="secondary ${db.scope==='exam:'+e.key?'active':''}" data-scope="exam:${e.key}" aria-pressed="${db.scope==='exam:'+e.key}">${escapeHTML(e.label)} <small>${e.count} câu</small></button>`).join('');}
+const isFE=e=>e.key.startsWith('fe-');
+const TERM_ORDER=['FA26','SU26','SP26'];
+const TERM_NAME={FA26:'Fall 2026',SU26:'Summer 2026',SP26:'Spring 2026'};
+function feParts(e){const m=e.label.match(/FE\s+(\w+)\s*(?:·\s*([^(]+))?/);return {term:m?m[1]:'FE',name:(m&&m[2]?m[2].trim():'Đề chính')};}
+function feCards(){
+  const fe=data.meta.exams.filter(isFE);
+  const terms=[...new Set(fe.map(e=>feParts(e).term))].sort((a,b)=>TERM_ORDER.indexOf(a)-TERM_ORDER.indexOf(b));
+  return terms.map(t=>`<div class="fe-term"><div class="fe-term-head"><span class="fe-term-tag">${t}</span><span>${TERM_NAME[t]||''}</span></div><div class="fe-grid">${fe.filter(e=>feParts(e).term===t).map(e=>{
+    const scope='exam:'+e.key,active=db.scope===scope,secs=sections(scope),done=secs.filter(s=>isDone(s)).length,fin=secs.length&&done===secs.length;
+    return `<button class="fe-card ${active?'active':''} ${fin?'finished':''}" data-scope="${scope}" aria-pressed="${active}"><span class="fe-kicker">ĐỀ FE · ${t}${fin?' · ✓':''}</span><strong>${escapeHTML(feParts(e).name)}</strong><small>${e.count} câu · ${done}/${secs.length} phần</small><i class="ch-bar"><b style="width:${secs.length?done/secs.length*100:0}%"></b></i></button>`;}).join('')}</div></div>`).join('');
+}
+function examButtons(){return `<div style="flex-basis:100%;font-size:13px;color:var(--muted);margin:6px 0 2px">Bộ đề khác (mỗi đề vẫn chia theo chương):</div>`+data.meta.exams.filter(e=>!isFE(e)).map(e=>`<button class="secondary ${db.scope==='exam:'+e.key?'active':''}" data-scope="exam:${e.key}" aria-pressed="${db.scope==='exam:'+e.key}">${escapeHTML(e.label)} <small>${e.count} câu</small></button>`).join('');}
 function sectionGrid(list,next){
   const chapters=[...new Set(list.map(s=>s.chapter))];
   return chapters.map(ch=>{
@@ -287,6 +309,7 @@ function home(){
   app.innerHTML=`<section class="hero"><div><div class="eyebrow">Mỗi chương một chặng, mỗi phần một bước tiến</div><h1>Hiểu từng câu.<br><em>Nhớ từng chương.</em></h1><p>Ôn Kinh tế chính trị theo nhịp của bạn.<br>Câu nào chưa đúng, mình cùng học lại.</p>${next?`<button id="start" class="primary">${pending&&!pending.done?'Tiếp tục':done===n?'Ôn lại':'Bắt đầu'} ${sectionLabel(next)} <span aria-hidden="true">↗</span></button>`:''}<div class="hero-hint">${pool().length} câu đang chọn · ${data.meta.count} câu toàn bộ</div></div><div class="art" aria-hidden="true"><div class="book"><small>GÓC HỌC CỦA BẠN</small><strong>Kinh tế chính trị<br>Mác – Lênin</strong><div class="book-line"></div><span>MLN122</span></div><div class="floating-check">✓</div><div class="floating-note"><b>✦</b> Từng chút một, sẽ nhớ.</div><span class="spark">✧</span></div></section>
 <section class="overview" aria-label="Tiến độ hoàn thành"><div class="overview-count">${done}<span style="color:#a2ae98"> / ${n}</span><small>phần đã xong</small></div><div class="overview-track" role="progressbar" aria-label="Số phần hoàn thành" aria-valuenow="${done}" aria-valuemin="0" aria-valuemax="${n}"><i style="width:${n?done/n*100:0}%"></i></div><span class="overview-label">${n&&done===n?'Bạn đã hoàn thành cả bộ!':'Tích lũy kiến thức, từng phần một.'}</span></section>
 <section class="chapter-panel" aria-label="Chọn chương ôn tập"><div><h2>Chọn chương để ôn</h2><p>${data.meta.count} câu được chia theo 6 chương của môn học; mỗi chương tự chia thành các phần ${db.size} câu. </p></div><div class="chapter-grid">${chapterCards()}</div><div class="chapter-filters">${examButtons()}${SPECIAL.map(([value,label])=>`<button class="secondary ${db.scope===value?'active':''}" data-scope="${value}" aria-pressed="${db.scope===value}"${value==='marked'&&!db.marked.length?' disabled':''}>${label} <small>${scoped(value).length} câu</small></button>`).join('')}</div></section>
+<section class="chapter-panel fe-panel" aria-label="Đề thi FE"><div><h2>Đề thi FE <span class="fe-badge">FU Exam</span></h2><p>Đề cuối kỳ các kỳ trước · mỗi đề vẫn chia theo chương thành các phần ${db.size} câu.</p></div>${feCards()}</section>
 <section><div class="section-heading"><div><h2>Các phần ôn tập · ${escapeHTML(scopeName)}</h2><p>Chọn một phần để bắt đầu · ${pool().length} câu trong bộ đang chọn.</p><button id="reset-all" class="text-button reset-link">↺ Reset toàn bộ tiến độ</button></div><div class="size-control" aria-label="Số câu mỗi phần"><button data-size="10" class="${db.size===10?'active':''}" aria-pressed="${db.size===10}">10 câu</button><button data-size="20" class="${db.size===20?'active':''}" aria-pressed="${db.size===20}">20 câu</button></div></div>${sectionGrid(list,next||{})}</section>
 <div class="source-bar"><span>${data.meta.count} câu luyện tập · 6 chương · Theo tài liệu MLN122.<br>Tiến độ 10 và 20 câu được lưu riêng trên trình duyệt này.</span><button id="review" class="text-button">Đáp án & tài liệu nguồn ↗</button></div>`;
   app.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{db.scope=b.dataset.scope;save();home();});
