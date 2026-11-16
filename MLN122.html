@@ -104,6 +104,37 @@ dialog{max-width:460px;width:calc(100% - 32px);border:1px solid var(--line);bord
 .rv-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:8px}.rv-badge{font-weight:700;padding:3px 9px;border-radius:99px}.rv-badge.ok{background:#eff6e8;color:#2d5e40}.rv-badge.no{background:#fbe9e6;color:var(--red)}
 .rv-title{font-size:19px;line-height:1.45;margin:4px 0 14px}.rv-you{margin-left:auto;font-size:11.5px;font-weight:700;opacity:.8}
 :root[data-theme="dark"] .rv-q{background:#1c2a24;border-color:#2c3d35}:root[data-theme="dark"] .rv-badge.ok{background:#22382c;color:#a9d6a0}:root[data-theme="dark"] .rv-badge.no{background:#3a2423;color:#f0a39c}
+/* --- Đấu nhanh (blitz) --- */
+.blitz-panel{display:grid;grid-template-columns:1fr 1.25fr;gap:22px;align-items:center;margin:0 0 30px;padding:24px 26px;border-radius:22px;border:1px solid var(--line);border-left:5px solid var(--orange);background:linear-gradient(120deg,var(--gold-bg),var(--surface));box-shadow:0 4px 0 var(--lift)}
+.blitz-kicker{font-size:11px;letter-spacing:1.6px;font-weight:800;color:var(--orange)}
+.blitz-panel h2{margin:6px 0;font-size:28px;letter-spacing:-.6px}.blitz-panel p{margin:0 0 8px;color:var(--muted);line-height:1.6;font-size:14px}.blitz-panel small{color:var(--muted);font-size:12.5px}
+.blitz-sources{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.blitz-src{text-align:left;display:flex;flex-direction:column;gap:3px;padding:13px 15px;min-height:64px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);box-shadow:0 3px 0 var(--lift);cursor:pointer;font:inherit;transition:transform .15s}
+.blitz-src:hover:not(:disabled){transform:translateY(-2px);border-color:var(--orange)}.blitz-src:disabled{opacity:.45;cursor:not-allowed}
+.blitz-src strong{font-size:15px}.blitz-src small{font-size:12px;color:var(--muted)}
+.bz-hud{display:flex;align-items:center;gap:18px;margin:14px 0 10px;flex-wrap:wrap}
+.bz-hearts{font-size:26px;letter-spacing:3px;color:var(--red);line-height:1}.bz-hearts .lost{color:var(--line)}
+.bz-score{display:flex;align-items:baseline;gap:6px}.bz-score b{font-size:30px;font-variant-numeric:tabular-nums}.bz-score small{color:var(--muted);font-size:13px}
+.bz-combo{margin-left:auto;padding:7px 14px;border-radius:30px;background:var(--light);color:var(--green);font-weight:750;font-size:14px}.bz-combo i{font-style:normal;opacity:.75;margin-left:6px}
+.bz-combo.hot{background:var(--gold-bg);color:var(--orange);animation:bzPulse 1s ease-in-out infinite}.bz-combo.blaze{background:var(--orange);color:#fff}
+.bz-timer{position:relative;height:16px;border-radius:9px;background:var(--light);overflow:hidden;margin-bottom:16px}
+.bz-timer i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#91b077);transition:width .1s linear}.bz-timer i.low{background:linear-gradient(90deg,var(--red),var(--orange))}
+.bz-timer span{position:absolute;right:9px;top:0;line-height:16px;font-size:10.5px;font-weight:800;color:var(--ink)}
+.bz-feedback{margin-top:16px;padding:14px 16px;border-radius:14px;line-height:1.6;font-size:14.5px}.bz-feedback.correct{background:var(--good-bg);color:var(--good-ink)}.bz-feedback.wrong{background:var(--bad-bg);color:var(--bad-ink)}
+.bz-card.shake{animation:bzShake .4s}.bz-card.pop{animation:bzPop .35s}
+@keyframes bzShake{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes bzPop{40%{transform:scale(1.015)}}
+@keyframes bzPulse{50%{transform:scale(1.06)}}
+body.bz-hurt::after{content:'';position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 140px 30px #d0302a77;z-index:60;animation:bzFade .6s forwards}
+@keyframes bzFade{to{opacity:0}}
+.bz-toast{position:fixed;left:50%;top:22px;z-index:70;max-width:calc(100% - 32px);padding:12px 20px;border-radius:16px;background:var(--accent);color:var(--on-accent);font-weight:800;box-shadow:0 10px 30px #0004;animation:bzToast 2.4s forwards;transform:translateX(-50%)}
+@keyframes bzToast{0%{opacity:0;transform:translate(-50%,-20px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
+.bz-break h1{font-size:28px;line-height:1.35}.bz-break-count{font-size:64px;font-weight:800;color:var(--orange);margin:6px 0;font-variant-numeric:tabular-nums}
+.bz-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.bz-wrong{text-align:left;margin-top:30px}.bz-wrong h2{font-size:20px;margin:0 0 4px}.bz-wrong>p{font-size:13px}
+@media(prefers-reduced-motion:reduce){.bz-card.shake,.bz-card.pop,.bz-combo.hot,body.bz-hurt::after,.bz-toast{animation:none}}
+@media(max-width:760px){.blitz-panel{grid-template-columns:1fr;padding:20px}}
+@media(max-width:420px){.blitz-sources{grid-template-columns:1fr}.bz-combo{margin-left:0}}
 </style>
 </head>
 <body>
@@ -148,7 +179,7 @@ const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 const KEY='mln122-nhip-hoc-v2', OLD_KEY='mln122-nhip-hoc-v1', REV='mln122-source-v2';
 const SPECIAL=[['all','Tất cả chương'],['marked','★ Đã đánh dấu']];
 const VALID_SCOPES=['all','marked','1','2','3','4','5','6'];
-let db={revision:REV,size:10,sound:true,auto:true,delay:1.2,scope:'all',marked:[],completed:{10:[],20:[]},sessions:{}}, data, byId, state=null, timer=null, audio=null, view='home', memoryOnly=false, hold=false, reviewPending=false;
+let db={revision:REV,size:10,sound:true,auto:true,delay:1.2,scope:'all',marked:[],completed:{10:[],20:[]},sessions:{},blitzBest:0,blitzRuns:0,blitzWrong:[],blitzFixed:[]}, data, byId, state=null, timer=null, audio=null, view='home', memoryOnly=false, hold=false, reviewPending=false;
 const secCache=new Map();
 
 /* ---------- lưu / tải ---------- */
@@ -177,6 +208,8 @@ function load(){
   if(![0.6,1.2,3].includes(db.delay))db.delay=1.2;
   for(const n of [10,20])if(!Array.isArray(db.completed[n]))db.completed[n]=[];
   if(!db.sessions||typeof db.sessions!=='object')db.sessions={};
+  if(!Number.isFinite(db.blitzBest))db.blitzBest=0;
+  for(const k of ['blitzWrong','blitzFixed'])if(!Array.isArray(db[k]))db[k]=[];
 }
 function cancel(){if(timer)clearTimeout(timer);timer=null;}
 function top(){window.scrollTo({top:0,behavior:'instant'});}
@@ -301,18 +334,20 @@ function sectionGrid(list,next){
   }).join('');
 }
 function home(){
-  cancel();view='home';state=null;
+  cancel();stopBlitzTimers();view='home';state=null;blitz=null;
   if(db.scope==='marked'&&!db.marked.length){db.scope='all';save();}
   const list=sections(),n=list.length,done=list.filter(s=>isDone(s)).length,next=nextRecommended(),pending=next&&db.sessions[key(next.sig)];
   const exm=String(db.scope).startsWith('exam:')?data.meta.exams.find(e=>'exam:'+e.key===db.scope):null;if(String(db.scope).startsWith('exam:')&&!exm){db.scope='all';save();}
   const scopeName=exm?exm.label:db.scope==='all'?'tất cả chương':(SPECIAL.find(x=>x[0]===db.scope)?.[1]||'Chương '+db.scope);
   app.innerHTML=`<section class="hero"><div><div class="eyebrow">Mỗi chương một chặng, mỗi phần một bước tiến</div><h1>Hiểu từng câu.<br><em>Nhớ từng chương.</em></h1><p>Ôn Kinh tế chính trị theo nhịp của bạn.<br>Câu nào chưa đúng, mình cùng học lại.</p>${next?`<button id="start" class="primary">${pending&&!pending.done?'Tiếp tục':done===n?'Ôn lại':'Bắt đầu'} ${sectionLabel(next)} <span aria-hidden="true">↗</span></button>`:''}<div class="hero-hint">${pool().length} câu đang chọn · ${data.meta.count} câu toàn bộ</div></div><div class="art" aria-hidden="true"><div class="book"><small>GÓC HỌC CỦA BẠN</small><strong>Kinh tế chính trị<br>Mác – Lênin</strong><div class="book-line"></div><span>MLN122</span></div><div class="floating-check">✓</div><div class="floating-note"><b>✦</b> Từng chút một, sẽ nhớ.</div><span class="spark">✧</span></div></section>
+${blitzPanel()}
 <section class="overview" aria-label="Tiến độ hoàn thành"><div class="overview-count">${done}<span style="color:#a2ae98"> / ${n}</span><small>phần đã xong</small></div><div class="overview-track" role="progressbar" aria-label="Số phần hoàn thành" aria-valuenow="${done}" aria-valuemin="0" aria-valuemax="${n}"><i style="width:${n?done/n*100:0}%"></i></div><span class="overview-label">${n&&done===n?'Bạn đã hoàn thành cả bộ!':'Tích lũy kiến thức, từng phần một.'}</span></section>
 <section class="chapter-panel" aria-label="Chọn chương ôn tập"><div><h2>Chọn chương để ôn</h2><p>${data.meta.count} câu được chia theo 6 chương của môn học; mỗi chương tự chia thành các phần ${db.size} câu. </p></div><div class="chapter-grid">${chapterCards()}</div><div class="chapter-filters">${examButtons()}${SPECIAL.map(([value,label])=>`<button class="secondary ${db.scope===value?'active':''}" data-scope="${value}" aria-pressed="${db.scope===value}"${value==='marked'&&!db.marked.length?' disabled':''}>${label} <small>${scoped(value).length} câu</small></button>`).join('')}</div></section>
 <section class="chapter-panel fe-panel" aria-label="Đề thi FE"><div><h2>Đề thi FE <span class="fe-badge">FU Exam</span></h2><p>Đề cuối kỳ các kỳ trước · mỗi đề vẫn chia theo chương thành các phần ${db.size} câu.</p></div>${feCards()}</section>
 <section><div class="section-heading"><div><h2>Các phần ôn tập · ${escapeHTML(scopeName)}</h2><p>Chọn một phần để bắt đầu · ${pool().length} câu trong bộ đang chọn.</p><button id="reset-all" class="text-button reset-link">↺ Reset toàn bộ tiến độ</button></div><div class="size-control" aria-label="Số câu mỗi phần"><button data-size="10" class="${db.size===10?'active':''}" aria-pressed="${db.size===10}">10 câu</button><button data-size="20" class="${db.size===20?'active':''}" aria-pressed="${db.size===20}">20 câu</button></div></div>${sectionGrid(list,next||{})}</section>
 <div class="source-bar"><span>${data.meta.count} câu luyện tập · 6 chương · Theo tài liệu MLN122.<br>Tiến độ 10 và 20 câu được lưu riêng trên trình duyệt này.</span><button id="review" class="text-button">Đáp án & tài liệu nguồn ↗</button></div>`;
   app.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{db.scope=b.dataset.scope;save();home();});
+  app.querySelectorAll('[data-blitz]').forEach(b=>b.onclick=()=>startBlitz(b.dataset.blitz));
   if($('start'))$('start').onclick=()=>start(next.sig);
   app.querySelectorAll('[data-sig]').forEach(b=>b.onclick=()=>start(b.dataset.sig));
   app.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>secReview(b.dataset.review));
@@ -343,9 +378,9 @@ function renderQuestion(){
   const settled=state.mastered.length,correct=feedback==='correct',marked=isMarked(q.id);
   const hd=hold||!db.auto;
   const autoCtl=`<div class="auto-ctl" role="group" aria-label="Tự qua câu"><button type="button" class="auto-toggle ${db.auto?'on':''}" id="auto-toggle" aria-pressed="${db.auto}">${db.auto?'⏩ Tự qua câu: Bật':'⏸ Tự qua câu: Tắt'}</button>${db.auto?[0.6,1.2,3].map(s=>`<button type="button" class="auto-delay ${db.delay===s?'active':''}" data-delay="${s}" aria-pressed="${db.delay===s}">${s}s</button>`).join(''):''}</div>`;
-  app.innerHTML=`<div class="learn-top"><button class="back" id="home">← Các phần ôn tập</button><span class="pill">${sectionLabel(state)} · ${state.ids.length} câu</span></div><div class="study-layout"><aside class="study-aside"><span class="aside-number">CHƯƠNG ${state.chapter} · NHỊP HỌC</span><h2>Phần ${String(state.part).padStart(2,'0')}</h2><p>${state.round===1?'Cứ bình tĩnh trả lời.<br>Đúng rồi, mình đi tiếp.':'Đây là những câu chưa đúng.<br>Ôn lại một lần nữa nhé.'}</p><div class="steps" aria-label="${settled} trên ${state.ids.length} câu đã đúng">${state.ids.map(id=>`<span class="step ${state.mastered.includes(id)?'done':''} ${id===q.id?'active':''}"></span>`).join('')}</div><p>${settled}/${state.ids.length} câu đã đúng<br>${state.errors} lần chọn sai</p><div class="mini-book" aria-hidden="true">✦</div><p>Mỗi câu hiểu thêm<br>là một bước tiến.</p></aside><section class="study-card"><div class="progress-label"><span>${state.round===1?'Tiến độ phần':'Ôn lại · lượt '+(state.round-1)}</span><b>${pos}/${total}${state.round>1?' câu ôn lại':''}</b></div><div class="progress" role="progressbar" aria-label="Câu đã trả lời đúng trong phần" aria-valuemin="0" aria-valuemax="${state.ids.length}" aria-valuenow="${settled}"><i style="width:${settled/state.ids.length*100}%"></i></div><div class="question-meta"><span>Chương ${q.chapter} · Câu ${q.local}</span><span>·</span><span class="${multi?'multi-tag':''}">${multi?'Chọn '+q.correct.length+' đáp án':'Chọn một đáp án'}</span>${statusLabel(q)?`<span>· ${statusLabel(q)}</span>`:''}<button class="mark-btn ${marked?'on':''}" id="mark" type="button" aria-pressed="${marked}">${marked?'★ Đã đánh dấu':'☆ Đánh dấu câu này'}</button></div><h1 class="question" id="question-title">${escapeHTML(q.question)}</h1><div class="options" role="group" aria-labelledby="question-title">${q.options.map((o,i)=>{const letter=String.fromCharCode(65+i),selected=state.selected.includes(letter),good=feedback&&q.correct.includes(letter),bad=feedback&&selected&&!q.correct.includes(letter);return `<button class="option ${selected?'selected':''} ${good?'good':''} ${bad?'bad':''}" data-option="${letter}" aria-pressed="${selected}" ${feedback?'disabled':''}><span class="letter">${letter}</span><span>${escapeHTML(o)}</span>${good||bad?`<span class="choice-mark" aria-label="${good?'Đáp án đúng':'Đã chọn sai'}">${good?'✓':'×'}</span>`:multi?`<span class="choice-mark" aria-hidden="true">${selected?'☑':'□'}</span>`:''}</button>`;}).join('')}</div>
+  app.innerHTML=`<div class="learn-top"><button class="back" id="home">← Các phần ôn tập</button><span class="pill">${sectionLabel(state)} · ${state.ids.length} câu</span></div><div class="study-layout"><aside class="study-aside"><span class="aside-number">CHƯƠNG ${state.chapter} · NHỊP HỌC</span><h2>Phần ${String(state.part).padStart(2,'0')}</h2><p>${state.round===1?'Cứ bình tĩnh trả lời.<br>Đúng rồi, mình đi tiếp.':'Đây là những câu chưa đúng.<br>Ôn lại một lần nữa nhé.'}</p><div class="steps" aria-label="${settled} trên ${state.ids.length} câu đã đúng">${state.ids.map(id=>`<span class="step ${state.mastered.includes(id)?'done':''} ${id===q.id?'active':''}"></span>`).join('')}</div><p>${settled}/${state.ids.length} câu đã đúng<br>${state.errors} lần chọn sai</p><div class="mini-book" aria-hidden="true">✦</div><p>Mỗi câu hiểu thêm<br>là một bước tiến.</p></aside><section class="study-card"><div class="progress-label"><span>${state.round===1?'Tiến độ phần':'Ôn lại · lượt '+(state.round-1)}</span><b>${pos}/${total}${state.round>1?' câu ôn lại':''}</b></div><div class="progress" role="progressbar" aria-label="Câu đã trả lời đúng trong phần" aria-valuemin="0" aria-valuemax="${state.ids.length}" aria-valuenow="${settled}"><i style="width:${settled/state.ids.length*100}%"></i></div><div class="question-meta"><span>Chương ${q.chapter} · Câu ${q.local}</span><span>·</span><span class="${multi?'multi-tag':''}">${multi?'Chọn '+q.correct.length+' đáp án':'Chọn một đáp án'}</span>${statusLabel(q)?`<span>· ${statusLabel(q)}</span>`:''}<button class="mark-btn ${marked?'on':''}" id="mark" type="button" aria-pressed="${marked}">${marked?'★ Đã đánh dấu':'☆ Đánh dấu câu này'}</button></div><h1 class="question" id="question-title">${escapeHTML(q.question)}</h1><div class="options" role="group" aria-labelledby="question-title">${q.options.map((o,i)=>{const letter=String.fromCharCode(65+i),selected=state.selected.includes(letter),good=feedback&&q.correct.includes(letter),bad=feedback&&selected&&!q.correct.includes(letter);return `<button class="option ${selected?'selected':''} ${good?'good':''} ${bad?'bad':''}" data-option="${letter}" aria-pressed="${selected}" ${feedback?'disabled':''}><span class="letter">${letter}</span><span>${escapeHTML(o)}</span>${good||bad?`<span class="choice-mark" aria-label="${good?'Đáp án đúng':'Đã chọn sai'}">${good?(selected?'✓':'✓ bạn bỏ sót'):'×'}</span>`:multi?`<span class="choice-mark" aria-hidden="true">${selected?'☑':'□'}</span>`:''}</button>`;}).join('')}</div>
 ${feedback?`<div class="feedback ${feedback}" role="status"><strong>${correct?'✓ Chính xác!':'Chưa đúng, mình ghi nhớ lại nhé.'}</strong>${correct?(hd?'<span>Đã giữ lại để bạn đọc giải thích. Bấm tiếp tục khi sẵn sàng.</span>':'<span>Đang chuyển sang câu tiếp theo…</span>'):`<p><b>Đáp án theo bộ học: ${q.correct.join(', ')}</b><br>${q.correct.map(l=>escapeHTML(l+'. '+q.options[l.charCodeAt(0)-65])).join('<br>')}</p><p>Câu này sẽ xuất hiện lại ở cuối lượt.</p>`}</div>`:''}
-<div class="study-actions"><span class="action-hint">${feedback?`${settled}/${state.ids.length} câu đã đúng · ${state.errors} lần sai`:multi?`Đã chọn ${state.selected.length}/${q.correct.length} · Chọn xong rồi kiểm tra.`:(db.auto?'Chạm đáp án · Đúng sẽ tự qua câu.':'Chạm đáp án · Đúng sẽ chờ bạn bấm tiếp tục.')}</span>${feedback==='wrong'||(correct&&hd)?`<button id="next" class="primary">${correct?'Tiếp tục →':'Đã hiểu, tiếp tục →'}</button>`:multi&&!feedback?`<button id="check" class="primary" ${state.selected.length?'':'disabled'}>Kiểm tra đáp án →</button>`:''}</div>${autoCtl}
+<div class="study-actions"><span class="action-hint">${feedback?`${settled}/${state.ids.length} câu đã đúng · ${state.errors} lần sai`:multi?`Đã chọn ${state.selected.length}/${q.correct.length} · Chọn xong rồi kiểm tra.`:(db.auto?'Chạm đáp án · Đúng sẽ tự qua câu.':'Chạm đáp án · Đúng sẽ chờ bạn bấm tiếp tục.')}</span>${feedback==='wrong'||(correct&&hd)?`<button id="next" class="primary">${correct?'Tiếp tục →':'Đã hiểu, tiếp tục →'}</button>`:multi&&!feedback?`<button id="check" class="primary" ${state.selected.length===q.correct.length?'':'disabled'}>Kiểm tra đáp án →</button>`:''}</div>${autoCtl}
 ${q.review?`<details class="note" ${feedback?'open':''}><summary>${q.review.status==='pending'?'Cần xác nhận đáp án':'Giải thích & nguồn đối chiếu'}</summary>${reviewEvidence(q)}</details>`:''}<div class="source-ref">Nguồn: Tài liệu MLN122 · ${escapeHTML(sourceRefs(q))}</div></section></div>`;
   $('home').onclick=home;$('mark').onclick=()=>toggleMark(q.id);
   app.querySelectorAll('[data-option]').forEach(b=>b.onclick=()=>choose(b.dataset.option));
@@ -430,6 +465,167 @@ function review(){
   paintMarks();top();
 }
 
+/* ---------- đấu nhanh (blitz): chế độ chống buồn ngủ ---------- */
+const BLITZ_TIME=20, BLITZ_MULTI_TIME=32, BLITZ_HEARTS=3, BREAK_EVERY=12, BREAK_SECONDS=15;
+const WAKE_TASKS=['Đứng dậy, vươn vai thật cao 🙆','Uống một ngụm nước thật to 💧','Xoay cổ 5 vòng mỗi bên 🔄','Đứng lên ngồi xuống 10 cái 🏋️','Vỗ nhẹ hai má, chớp mắt thật mạnh 10 lần 👏','Hít sâu 4 giây, thở ra 6 giây, 3 lần 🌬️','Nhìn ra thật xa cho mắt nghỉ 👀','Đọc to câu khó nhất vừa gặp 📣','Nắm chặt rồi duỗi bàn tay 10 lần ✊','Đi một vòng quanh phòng 🚶'];
+const RANKS=[[0,'Đang ngái ngủ 😴'],[600,'Mắt đã mở 👀'],[1800,'Tỉnh như sáo 🐦'],[3600,'Cà phê đậm đặc ☕'],[6500,'Triết gia thức đêm 🦉'],[10000,'Mác cũng phải nể 🧔']];
+const PRAISE=['Chuẩn!','Đỉnh!','Ngon lành!','Quá tỉnh!','Chuẩn bài!','Mác gật gù 👍','Vững!'];
+let blitz=null, blitzTick=null, breakTick=null;
+function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function rankIndex(score){let i=0;RANKS.forEach(([min],k)=>{if(score>=min)i=k;});return i;}
+function multiplier(combo){return combo>=10?3:combo>=5?2:combo>=3?1.5:1;}
+function wrongIds(){
+  const ids=new Set(db.blitzWrong);
+  for(const s of Object.values(db.sessions))for(const [id,v] of Object.entries(s.log||{}))if(!v.ok)ids.add(Number(id));
+  return [...ids].filter(id=>byId.has(id)&&!db.blitzFixed.includes(id));
+}
+function blitzSources(){return [
+  ['fe','🎯 Toàn bộ đề FE',data.questions.filter(q=>(q.exams||[]).some(e=>e.startsWith('fe-'))).map(q=>q.id)],
+  ['scope','📚 Bộ đang chọn',pool().map(q=>q.id)],
+  ['wrong','🩹 Câu từng làm sai',wrongIds()],
+  ['marked','★ Câu đã đánh dấu',[...db.marked]]
+];}
+function blitzPanel(){
+  return `<section class="blitz-panel" aria-label="Chế độ đấu nhanh"><div><div class="blitz-kicker">⚡ CHỐNG BUỒN NGỦ</div><h2>Đấu nhanh</h2><p>${BLITZ_TIME} giây mỗi câu · ${BLITZ_HEARTS} mạng · combo nhân điểm tới ×3. Cứ ${BREAK_EVERY} câu có một nhiệm vụ vận động. Gõ phím <b>A–E</b> cho nhanh.</p><small>Kỷ lục của bạn: <b>${db.blitzBest}</b> điểm · ${RANKS[rankIndex(db.blitzBest)][1]}</small></div><div class="blitz-sources">${blitzSources().map(([k,label,ids])=>`<button class="blitz-src" data-blitz="${k}" type="button" ${ids.length?'':'disabled'}><strong>${label}</strong><small>${ids.length} câu</small></button>`).join('')}</div></section>`;
+}
+function startBlitz(src){
+  const found=blitzSources().find(s=>s[0]===src);if(!found||!found[2].length)return;
+  cancel();stopBlitzTimers();unlockAudio();view='blitz';streak=0;
+  blitz={src,label:found[1],queue:shuffle(found[2]),pos:0,hearts:BLITZ_HEARTS,score:0,combo:0,maxCombo:0,right:0,answered:0,selected:[],feedback:null,timeout:false,deadline:0,pausedAt:0,gain:0,wrong:[],level:0,phase:'q'};
+  blitzQuestion();
+}
+function blitzQ(){return byId.get(blitz.queue[blitz.pos]);}
+function blitzLimit(q){return q.correct.length>1?BLITZ_MULTI_TIME:BLITZ_TIME;}
+function blitzQuestion(){
+  blitz.phase='q';blitz.selected=[];blitz.feedback=null;blitz.timeout=false;blitz.gain=0;
+  blitz.deadline=performance.now()+blitzLimit(blitzQ())*1000;
+  renderBlitz();startBlitzTick();top();
+}
+function stopBlitzTimers(){if(blitzTick)clearInterval(blitzTick);if(breakTick)clearInterval(breakTick);blitzTick=null;breakTick=null;}
+function tickSound(){if(!db.sound||!audio)return;try{note(1250,audio.currentTime,.05,'square',.025);}catch{}}
+function startBlitzTick(){
+  stopBlitzTimers();let lastSec=null;
+  blitzTick=setInterval(()=>{
+    if(view!=='blitz'||!blitz||blitz.phase!=='q'||blitz.feedback){stopBlitzTimers();return;}
+    if(blitz.pausedAt)return;
+    const left=Math.max(0,blitz.deadline-performance.now()),pct=left/(blitzLimit(blitzQ())*1000),sec=Math.ceil(left/1000);
+    const bar=$('bz-time'),lab=$('bz-sec');
+    if(bar){bar.style.width=pct*100+'%';bar.classList.toggle('low',left<5000);}
+    if(lab)lab.textContent=sec+'s';
+    if(sec!==lastSec&&sec<=5&&sec>0)tickSound();
+    lastSec=sec;
+    if(left<=0)blitzGrade(true);
+  },100);
+}
+/* Pause the countdown while the tab is hidden so switching apps doesn't cost a heart. */
+document.addEventListener('visibilitychange',()=>{
+  if(view!=='blitz'||!blitz||blitz.phase!=='q'||blitz.feedback)return;
+  if(document.hidden)blitz.pausedAt=performance.now();
+  else if(blitz.pausedAt){blitz.deadline+=performance.now()-blitz.pausedAt;blitz.pausedAt=0;}
+});
+function renderBlitz(){
+  const q=blitzQ(),fb=blitz.feedback,multi=q.correct.length>1,mult=multiplier(blitz.combo);
+  const hearts=Array.from({length:BLITZ_HEARTS},(_,i)=>`<span class="${i<blitz.hearts?'':'lost'}">♥</span>`).join('');
+  const opts=q.options.map((o,i)=>{
+    const L=String.fromCharCode(65+i),sel=blitz.selected.includes(L),good=fb&&q.correct.includes(L),bad=fb&&sel&&!q.correct.includes(L),miss=good&&!sel;
+    const mark=good||bad?`<span class="choice-mark">${bad?'×':miss?'✓ bỏ sót':'✓'}</span>`:multi?`<span class="choice-mark" aria-hidden="true">${sel?'☑':'□'}</span>`:'';
+    return `<button class="option ${sel?'selected':''} ${good?'good':''} ${bad?'bad':''}" data-bz="${L}" aria-pressed="${sel}" ${fb?'disabled':''}><span class="letter">${L}</span><span>${escapeHTML(o)}</span>${mark}</button>`;
+  }).join('');
+  const answerText=q.correct.map(L=>`${L}. ${escapeHTML(q.options[L.charCodeAt(0)-65]||'')}`).join('<br>');
+  const feedback=fb==='correct'?`<div class="bz-feedback correct"><b>+${blitz.gain}</b> ${PRAISE[Math.floor(Math.random()*PRAISE.length)]}${blitz.healed?' · Combo 10, hồi 1 ♥':''}</div>`:fb==='wrong'?`<div class="bz-feedback wrong"><b>${blitz.timeout?'⏰ Hết giờ!':'✗ Sai rồi!'}</b> Mất 1 ♥. Đáp án đúng:<br>${answerText}</div>`:'';
+  const action=fb==='wrong'?`<button class="primary" id="bz-next">${blitz.hearts<=0?'Xem kết quả':'Đã nhớ, tiếp →'}</button>`:multi&&!fb?`<button class="primary" id="bz-check" ${blitz.selected.length===q.correct.length?'':'disabled'}>Chốt đáp án →</button>`:'';
+  const hint=fb==='wrong'?'Enter để tiếp':fb?'Đang qua câu…':multi?`Đã chọn ${blitz.selected.length}/${q.correct.length} · Enter để chốt`:'Bấm hoặc gõ phím A–E';
+  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Thoát</button><span class="pill">⚡ Đấu nhanh · ${escapeHTML(blitz.label)}</span></div>
+<section class="bz-hud"><div class="bz-hearts" aria-label="Còn ${blitz.hearts} mạng">${hearts}</div><div class="bz-score"><b>${blitz.score}</b><small>điểm · ${RANKS[rankIndex(blitz.score)][1]}</small></div><div class="bz-combo ${blitz.combo>=3?'hot':''} ${blitz.combo>=10?'blaze':''}">${blitz.combo>=3?'🔥 ':''}Combo ${blitz.combo}<i>×${mult}</i></div></section>
+<div class="bz-timer" aria-hidden="true"><i id="bz-time" style="width:${fb?0:100}%"></i><span id="bz-sec">${fb?'':blitzLimit(q)+'s'}</span></div>
+<section class="study-card bz-card ${fb==='wrong'?'shake':''} ${fb==='correct'?'pop':''}"><div class="question-meta"><span>Câu ${blitz.answered+(fb?0:1)} · Chương ${q.chapter}</span><span>·</span><span class="${multi?'multi-tag':''}">${multi?'Chọn '+q.correct.length+' đáp án':'Chọn một đáp án'}</span></div><h1 class="question" id="bz-title">${escapeHTML(q.question)}</h1><div class="options" role="group" aria-labelledby="bz-title">${opts}</div>${feedback}<div class="study-actions"><span class="action-hint">${hint}</span>${action}</div></section>`;
+  $('bz-quit').onclick=home;
+  app.querySelectorAll('[data-bz]').forEach(b=>b.onclick=()=>blitzChoose(b.dataset.bz));
+  if($('bz-check'))$('bz-check').onclick=()=>blitzGrade(false);
+  if($('bz-next'))$('bz-next').onclick=blitzNext;
+}
+function blitzChoose(L){
+  if(!blitz||blitz.phase!=='q'||blitz.feedback)return;
+  const q=blitzQ();if(L.charCodeAt(0)-65>=q.options.length)return;
+  unlockAudio();
+  if(q.correct.length===1){blitz.selected=[L];blitzGrade(false);return;}
+  blitz.selected=blitz.selected.includes(L)?blitz.selected.filter(x=>x!==L):[...blitz.selected,L];
+  renderBlitz();
+}
+function hurtFlash(){document.body.classList.remove('bz-hurt');void document.body.offsetWidth;document.body.classList.add('bz-hurt');setTimeout(()=>document.body.classList.remove('bz-hurt'),600);}
+function toast(text){const t=document.createElement('div');t.className='bz-toast';t.setAttribute('role','status');t.textContent=text;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function blitzGrade(timeout){
+  if(!blitz||blitz.phase!=='q'||blitz.feedback)return;
+  if(!timeout&&blitz.selected.length!==blitzQ().correct.length)return;
+  stopBlitzTimers();
+  const q=blitzQ(),ok=!timeout&&sameSet(blitz.selected,q.correct);
+  blitz.timeout=timeout;blitz.answered++;blitz.healed=false;
+  if(ok){
+    const left=Math.max(0,blitz.deadline-performance.now())/1000;
+    blitz.combo++;blitz.maxCombo=Math.max(blitz.maxCombo,blitz.combo);blitz.right++;
+    blitz.gain=Math.round((100+left*10)*multiplier(blitz.combo));blitz.score+=blitz.gain;blitz.feedback='correct';
+    if(blitz.combo%10===0&&blitz.hearts<BLITZ_HEARTS){blitz.hearts++;blitz.healed=true;}
+    if(db.blitzWrong.includes(q.id)||wrongIds().includes(q.id)){db.blitzWrong=db.blitzWrong.filter(id=>id!==q.id);if(!db.blitzFixed.includes(q.id))db.blitzFixed.push(q.id);}
+  }else{
+    blitz.combo=0;blitz.hearts--;blitz.feedback='wrong';blitz.wrong.push(q.id);
+    if(!db.blitzWrong.includes(q.id))db.blitzWrong.push(q.id);
+    db.blitzFixed=db.blitzFixed.filter(id=>id!==q.id);
+  }
+  save();tone(ok);if(!ok)hurtFlash();
+  renderBlitz();
+  say(ok?`Đúng, cộng ${blitz.gain} điểm.`:`${timeout?'Hết giờ':'Sai'}. Đáp án ${q.correct.join(', ')}. Còn ${blitz.hearts} mạng.`);
+  if(ok){
+    const lv=rankIndex(blitz.score);
+    if(lv>blitz.level){blitz.level=lv;toast('⬆ Lên cấp: '+RANKS[lv][1]);fanfare();}
+    else if(blitz.combo===5||blitz.combo===10||blitz.combo===20)toast(`🔥 Combo ${blitz.combo}! Điểm ×${multiplier(blitz.combo)}`);
+    timer=setTimeout(()=>{if(view==='blitz')blitzNext();},850);
+  }
+}
+function blitzNext(){
+  cancel();if(!blitz||blitz.phase!=='q'||!blitz.feedback)return;
+  if(blitz.hearts<=0||blitz.pos+1>=blitz.queue.length){blitzOver();return;}
+  blitz.pos++;
+  if(blitz.answered%BREAK_EVERY===0){wakeBreak();return;}
+  blitzQuestion();
+}
+function wakeBreak(){
+  stopBlitzTimers();blitz.phase='break';
+  const task=WAKE_TASKS[Math.floor(Math.random()*WAKE_TASKS.length)];let left=BREAK_SECONDS;
+  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Thoát</button><span class="pill">⚡ Đấu nhanh · nghỉ giữa hiệp</span></div><section class="summary-card bz-break"><div class="medallion" aria-hidden="true">🏃</div><div class="eyebrow" style="justify-content:center">Nhiệm vụ tỉnh táo · ${BREAK_SECONDS} giây</div><h1>${task}</h1><div class="bz-break-count" id="bz-break" aria-live="off">${left}</div><p>${blitz.answered} câu · ${blitz.score} điểm · ${'♥'.repeat(blitz.hearts)} · combo ${blitz.combo} vẫn được giữ</p><div class="bz-actions"><button class="primary" id="bz-resume">Xong, chiến tiếp ⚡</button></div></section>`;
+  $('bz-quit').onclick=home;$('bz-resume').onclick=blitzResume;top();
+  say('Nghỉ giữa hiệp: '+task);
+  breakTick=setInterval(()=>{
+    left--;const el=$('bz-break');if(el)el.textContent=left>0?left:'Xong!';
+    if(left<=0){clearInterval(breakTick);breakTick=null;fanfare();}
+  },1000);
+}
+function blitzResume(){if(!blitz||blitz.phase!=='break')return;stopBlitzTimers();blitzQuestion();}
+function blitzOver(){
+  stopBlitzTimers();cancel();blitz.phase='over';
+  const best=blitz.score>db.blitzBest;if(best){db.blitzBest=blitz.score;}
+  db.blitzRuns=(db.blitzRuns||0)+1;save();
+  const acc=blitz.answered?Math.round(blitz.right/blitz.answered*100):0,cleared=blitz.hearts>0;
+  const wrongList=[...new Set(blitz.wrong)].map(id=>byId.get(id)).filter(Boolean);
+  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Các phần ôn tập</button><span class="pill">⚡ Kết quả đấu nhanh</span></div><section class="summary-card"><div class="medallion" aria-hidden="true">${best?'🏆':cleared?'✓':'💤'}</div><div class="eyebrow" style="justify-content:center">${best?'Kỷ lục mới!':cleared?'Hết câu rồi, bạn vẫn sống sót':'Hết mạng rồi'}</div><h1>${blitz.score} điểm</h1><p>Cấp độ: <b>${RANKS[rankIndex(blitz.score)][1]}</b><br>Kỷ lục: ${db.blitzBest} điểm</p><div class="summary-metrics"><div><b>${blitz.right}/${blitz.answered}</b><span>Câu đúng · ${acc}%</span></div><div><b>${blitz.maxCombo}</b><span>Combo cao nhất</span></div></div><div class="bz-actions"><button class="secondary" id="bz-home">Về trang chính</button><button class="primary" id="bz-again">↻ Chơi lại</button></div>${wrongList.length?`<div class="bz-wrong"><h2>Các câu sai lượt này (${wrongList.length})</h2><p>Đã lưu vào bộ “Câu từng làm sai” để bạn đấu lại sau.</p>${wrongList.map(q=>`<details class="review-item"><summary>Chương ${q.chapter} · ${escapeHTML(q.question)}</summary><p><b>${q.correct.map(L=>`${L}. ${escapeHTML(q.options[L.charCodeAt(0)-65]||'')}`).join('<br>')}</b></p>${q.review?.explanation?`<p>${escapeHTML(q.review.explanation)}</p>`:''}</details>`).join('')}</div>`:''}</section>`;
+  $('bz-quit').onclick=home;$('bz-home').onclick=home;$('bz-again').onclick=()=>startBlitz(blitz.src);
+  if(best){fanfare();confetti();}
+  say(`Kết thúc. ${blitz.score} điểm, đúng ${blitz.right} trên ${blitz.answered} câu.`);top();
+}
+document.addEventListener('keydown',e=>{
+  if(view!=='blitz'||!blitz||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toUpperCase();
+  if(k==='ENTER'){
+    e.preventDefault();
+    if(blitz.phase==='break')blitzResume();
+    else if(blitz.phase==='q'&&blitz.feedback==='wrong')blitzNext();
+    else if(blitz.phase==='q'&&!blitz.feedback)blitzGrade(false);
+    return;
+  }
+  if(blitz.phase!=='q'||blitz.feedback)return;
+  const map={A:'A',B:'B',C:'C',D:'D',E:'E','1':'A','2':'B','3':'C','4':'D','5':'E'};
+  if(map[k]){e.preventDefault();blitzChoose(map[k]);}
+});
+
 /* ---------- reset, khởi động ---------- */
 $('reset-cancel').onclick=()=>$('reset-dialog').close();
 $('reset-confirm').onclick=()=>{cancel();db=resetProgress(db);state=null;save();$('reset-dialog').close();home();say('Đã reset toàn bộ tiến độ các chương.');};
@@ -438,7 +634,7 @@ function init(){
   try{
     data=JSON.parse(document.getElementById('questions-data').textContent);
     byId=new Map(data.questions.map(q=>[q.id,q]));
-    db.marked=db.marked.filter(id=>byId.has(id));
+    db.marked=db.marked.filter(id=>byId.has(id));db.blitzWrong=db.blitzWrong.filter(id=>byId.has(id));db.blitzFixed=db.blitzFixed.filter(id=>byId.has(id));
     for(const [k,s] of Object.entries(db.sessions)){
       const ok=s&&[10,20].includes(s.size)&&Array.isArray(s.ids)&&s.ids.length&&s.ids.every(id=>byId.has(id))&&k===key(s.section,s.size)&&Array.isArray(s.queue)&&s.queue.length&&s.queue.every(id=>s.ids.includes(id))&&Array.isArray(s.mastered)&&Array.isArray(s.selected)&&s.position>=0&&(s.done||s.position<s.queue.length);
       if(!ok)delete db.sessions[k];
