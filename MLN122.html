@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#f7f8f2">
 <meta name="description" content="Ôn MLN122 theo từng chương. Trả lời, nghe phản hồi và học lại câu sai cho đến khi nhớ.">
 <title>Nhịp học · MLN122</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MLN122">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script>
 /* Run before CSS to avoid a white flash when opening a saved dark theme. */
 (()=>{
@@ -619,6 +626,7 @@ function init(){
   }catch(e){app.innerHTML='<p class="loading">Chưa tải được câu hỏi. Thử tải lại trang.</p><button class="primary" id="reload">Tải lại trang</button>';$('reload').onclick=()=>location.reload();}
 }
 init();
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
 </script>
 </body>
