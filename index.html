@@ -113,13 +113,10 @@ dialog{max-width:460px;width:calc(100% - 32px);border:1px solid var(--line);bord
 .blitz-src:hover:not(:disabled){transform:translateY(-2px);border-color:var(--orange)}.blitz-src:disabled{opacity:.45;cursor:not-allowed}
 .blitz-src strong{font-size:15px}.blitz-src small{font-size:12px;color:var(--muted)}
 .bz-hud{display:flex;align-items:center;gap:18px;margin:14px 0 10px;flex-wrap:wrap}
-.bz-hearts{font-size:26px;letter-spacing:3px;color:var(--red);line-height:1}.bz-hearts .lost{color:var(--line)}
 .bz-score{display:flex;align-items:baseline;gap:6px}.bz-score b{font-size:30px;font-variant-numeric:tabular-nums}.bz-score small{color:var(--muted);font-size:13px}
+.bz-end{min-height:40px;padding:8px 14px;font-size:13px}
 .bz-combo{margin-left:auto;padding:7px 14px;border-radius:30px;background:var(--light);color:var(--green);font-weight:750;font-size:14px}.bz-combo i{font-style:normal;opacity:.75;margin-left:6px}
 .bz-combo.hot{background:var(--gold-bg);color:var(--orange);animation:bzPulse 1s ease-in-out infinite}.bz-combo.blaze{background:var(--orange);color:#fff}
-.bz-timer{position:relative;height:16px;border-radius:9px;background:var(--light);overflow:hidden;margin-bottom:16px}
-.bz-timer i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#91b077);transition:width .1s linear}.bz-timer i.low{background:linear-gradient(90deg,var(--red),var(--orange))}
-.bz-timer span{position:absolute;right:9px;top:0;line-height:16px;font-size:10.5px;font-weight:800;color:var(--ink)}
 .bz-feedback{margin-top:16px;padding:14px 16px;border-radius:14px;line-height:1.6;font-size:14.5px}.bz-feedback.correct{background:var(--good-bg);color:var(--good-ink)}.bz-feedback.wrong{background:var(--bad-bg);color:var(--bad-ink)}
 .bz-card.shake{animation:bzShake .4s}.bz-card.pop{animation:bzPop .35s}
 @keyframes bzShake{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
@@ -466,11 +463,11 @@ function review(){
 }
 
 /* ---------- đấu nhanh (blitz): chế độ chống buồn ngủ ---------- */
-const BLITZ_TIME=20, BLITZ_MULTI_TIME=32, BLITZ_HEARTS=3, BREAK_EVERY=12, BREAK_SECONDS=15;
+const BREAK_EVERY=12, BREAK_SECONDS=15, BASE_POINTS=100;
 const WAKE_TASKS=['Đứng dậy, vươn vai thật cao 🙆','Uống một ngụm nước thật to 💧','Xoay cổ 5 vòng mỗi bên 🔄','Đứng lên ngồi xuống 10 cái 🏋️','Vỗ nhẹ hai má, chớp mắt thật mạnh 10 lần 👏','Hít sâu 4 giây, thở ra 6 giây, 3 lần 🌬️','Nhìn ra thật xa cho mắt nghỉ 👀','Đọc to câu khó nhất vừa gặp 📣','Nắm chặt rồi duỗi bàn tay 10 lần ✊','Đi một vòng quanh phòng 🚶'];
 const RANKS=[[0,'Đang ngái ngủ 😴'],[600,'Mắt đã mở 👀'],[1800,'Tỉnh như sáo 🐦'],[3600,'Cà phê đậm đặc ☕'],[6500,'Triết gia thức đêm 🦉'],[10000,'Mác cũng phải nể 🧔']];
 const PRAISE=['Chuẩn!','Đỉnh!','Ngon lành!','Quá tỉnh!','Chuẩn bài!','Mác gật gù 👍','Vững!'];
-let blitz=null, blitzTick=null, breakTick=null;
+let blitz=null, breakTick=null;
 function shuffle(list){const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function rankIndex(score){let i=0;RANKS.forEach(([min],k)=>{if(score>=min)i=k;});return i;}
 function multiplier(combo){return combo>=10?3:combo>=5?2:combo>=3?1.5:1;}
@@ -486,94 +483,67 @@ function blitzSources(){return [
   ['marked','★ Câu đã đánh dấu',[...db.marked]]
 ];}
 function blitzPanel(){
-  return `<section class="blitz-panel" aria-label="Chế độ đấu nhanh"><div><div class="blitz-kicker">⚡ CHỐNG BUỒN NGỦ</div><h2>Đấu nhanh</h2><p>${BLITZ_TIME} giây mỗi câu · ${BLITZ_HEARTS} mạng · combo nhân điểm tới ×3. Cứ ${BREAK_EVERY} câu có một nhiệm vụ vận động. Gõ phím <b>A–E</b> cho nhanh.</p><small>Kỷ lục của bạn: <b>${db.blitzBest}</b> điểm · ${RANKS[rankIndex(db.blitzBest)][1]}</small></div><div class="blitz-sources">${blitzSources().map(([k,label,ids])=>`<button class="blitz-src" data-blitz="${k}" type="button" ${ids.length?'':'disabled'}><strong>${label}</strong><small>${ids.length} câu</small></button>`).join('')}</div></section>`;
+  return `<section class="blitz-panel" aria-label="Chế độ đấu nhanh"><div><div class="blitz-kicker">⚡ CHỐNG BUỒN NGỦ</div><h2>Đấu nhanh</h2><p>Câu hỏi xáo trộn · combo nhân điểm tới ×3 · lên cấp. Cứ ${BREAK_EVERY} câu có một nhiệm vụ vận động. Gõ phím <b>A–E</b> cho nhanh.</p><small>Kỷ lục của bạn: <b>${db.blitzBest}</b> điểm · ${RANKS[rankIndex(db.blitzBest)][1]}</small></div><div class="blitz-sources">${blitzSources().map(([k,label,ids])=>`<button class="blitz-src" data-blitz="${k}" type="button" ${ids.length?'':'disabled'}><strong>${label}</strong><small>${ids.length} câu</small></button>`).join('')}</div></section>`;
 }
 function startBlitz(src){
   const found=blitzSources().find(s=>s[0]===src);if(!found||!found[2].length)return;
   cancel();stopBlitzTimers();unlockAudio();view='blitz';streak=0;
-  blitz={src,label:found[1],queue:shuffle(found[2]),pos:0,hearts:BLITZ_HEARTS,score:0,combo:0,maxCombo:0,right:0,answered:0,selected:[],feedback:null,timeout:false,deadline:0,pausedAt:0,gain:0,wrong:[],level:0,phase:'q'};
+  blitz={src,label:found[1],queue:shuffle(found[2]),pos:0,score:0,combo:0,maxCombo:0,right:0,answered:0,selected:[],feedback:null,gain:0,wrong:[],level:0,phase:'q'};
   blitzQuestion();
 }
 function blitzQ(){return byId.get(blitz.queue[blitz.pos]);}
-function blitzLimit(q){return q.correct.length>1?BLITZ_MULTI_TIME:BLITZ_TIME;}
 function blitzQuestion(){
-  blitz.phase='q';blitz.selected=[];blitz.feedback=null;blitz.timeout=false;blitz.gain=0;
-  blitz.deadline=performance.now()+blitzLimit(blitzQ())*1000;
-  renderBlitz();startBlitzTick();top();
+  blitz.phase='q';blitz.selected=[];blitz.feedback=null;blitz.gain=0;
+  renderBlitz();top();
 }
-function stopBlitzTimers(){if(blitzTick)clearInterval(blitzTick);if(breakTick)clearInterval(breakTick);blitzTick=null;breakTick=null;}
-function tickSound(){if(!db.sound||!audio)return;try{note(1250,audio.currentTime,.05,'square',.025);}catch{}}
-function startBlitzTick(){
-  stopBlitzTimers();let lastSec=null;
-  blitzTick=setInterval(()=>{
-    if(view!=='blitz'||!blitz||blitz.phase!=='q'||blitz.feedback){stopBlitzTimers();return;}
-    if(blitz.pausedAt)return;
-    const left=Math.max(0,blitz.deadline-performance.now()),pct=left/(blitzLimit(blitzQ())*1000),sec=Math.ceil(left/1000);
-    const bar=$('bz-time'),lab=$('bz-sec');
-    if(bar){bar.style.width=pct*100+'%';bar.classList.toggle('low',left<5000);}
-    if(lab)lab.textContent=sec+'s';
-    if(sec!==lastSec&&sec<=5&&sec>0)tickSound();
-    lastSec=sec;
-    if(left<=0)blitzGrade(true);
-  },100);
-}
-/* Pause the countdown while the tab is hidden so switching apps doesn't cost a heart. */
-document.addEventListener('visibilitychange',()=>{
-  if(view!=='blitz'||!blitz||blitz.phase!=='q'||blitz.feedback)return;
-  if(document.hidden)blitz.pausedAt=performance.now();
-  else if(blitz.pausedAt){blitz.deadline+=performance.now()-blitz.pausedAt;blitz.pausedAt=0;}
-});
+function stopBlitzTimers(){if(breakTick)clearInterval(breakTick);breakTick=null;}
 function renderBlitz(){
   const q=blitzQ(),fb=blitz.feedback,multi=q.correct.length>1,mult=multiplier(blitz.combo);
-  const hearts=Array.from({length:BLITZ_HEARTS},(_,i)=>`<span class="${i<blitz.hearts?'':'lost'}">♥</span>`).join('');
   const opts=q.options.map((o,i)=>{
     const L=String.fromCharCode(65+i),sel=blitz.selected.includes(L),good=fb&&q.correct.includes(L),bad=fb&&sel&&!q.correct.includes(L),miss=good&&!sel;
     const mark=good||bad?`<span class="choice-mark">${bad?'×':miss?'✓ bỏ sót':'✓'}</span>`:multi?`<span class="choice-mark" aria-hidden="true">${sel?'☑':'□'}</span>`:'';
     return `<button class="option ${sel?'selected':''} ${good?'good':''} ${bad?'bad':''}" data-bz="${L}" aria-pressed="${sel}" ${fb?'disabled':''}><span class="letter">${L}</span><span>${escapeHTML(o)}</span>${mark}</button>`;
   }).join('');
   const answerText=q.correct.map(L=>`${L}. ${escapeHTML(q.options[L.charCodeAt(0)-65]||'')}`).join('<br>');
-  const feedback=fb==='correct'?`<div class="bz-feedback correct"><b>+${blitz.gain}</b> ${PRAISE[Math.floor(Math.random()*PRAISE.length)]}${blitz.healed?' · Combo 10, hồi 1 ♥':''}</div>`:fb==='wrong'?`<div class="bz-feedback wrong"><b>${blitz.timeout?'⏰ Hết giờ!':'✗ Sai rồi!'}</b> Mất 1 ♥. Đáp án đúng:<br>${answerText}</div>`:'';
-  const action=fb==='wrong'?`<button class="primary" id="bz-next">${blitz.hearts<=0?'Xem kết quả':'Đã nhớ, tiếp →'}</button>`:multi&&!fb?`<button class="primary" id="bz-check" ${blitz.selected.length===q.correct.length?'':'disabled'}>Chốt đáp án →</button>`:'';
+  const feedback=fb==='correct'?`<div class="bz-feedback correct"><b>+${blitz.gain}</b> ${PRAISE[Math.floor(Math.random()*PRAISE.length)]}</div>`:fb==='wrong'?`<div class="bz-feedback wrong"><b>✗ Sai rồi!</b> Combo về 0. Đáp án đúng:<br>${answerText}</div>`:'';
+  const last=blitz.pos+1>=blitz.queue.length;
+  const action=fb==='wrong'?`<button class="primary" id="bz-next">${last?'Xem kết quả':'Đã nhớ, tiếp →'}</button>`:multi&&!fb?`<button class="primary" id="bz-check" ${blitz.selected.length===q.correct.length?'':'disabled'}>Chốt đáp án →</button>`:'';
   const hint=fb==='wrong'?'Enter để tiếp':fb?'Đang qua câu…':multi?`Đã chọn ${blitz.selected.length}/${q.correct.length} · Enter để chốt`:'Bấm hoặc gõ phím A–E';
   app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Thoát</button><span class="pill">⚡ Đấu nhanh · ${escapeHTML(blitz.label)}</span></div>
-<section class="bz-hud"><div class="bz-hearts" aria-label="Còn ${blitz.hearts} mạng">${hearts}</div><div class="bz-score"><b>${blitz.score}</b><small>điểm · ${RANKS[rankIndex(blitz.score)][1]}</small></div><div class="bz-combo ${blitz.combo>=3?'hot':''} ${blitz.combo>=10?'blaze':''}">${blitz.combo>=3?'🔥 ':''}Combo ${blitz.combo}<i>×${mult}</i></div></section>
-<div class="bz-timer" aria-hidden="true"><i id="bz-time" style="width:${fb?0:100}%"></i><span id="bz-sec">${fb?'':blitzLimit(q)+'s'}</span></div>
-<section class="study-card bz-card ${fb==='wrong'?'shake':''} ${fb==='correct'?'pop':''}"><div class="question-meta"><span>Câu ${blitz.answered+(fb?0:1)} · Chương ${q.chapter}</span><span>·</span><span class="${multi?'multi-tag':''}">${multi?'Chọn '+q.correct.length+' đáp án':'Chọn một đáp án'}</span></div><h1 class="question" id="bz-title">${escapeHTML(q.question)}</h1><div class="options" role="group" aria-labelledby="bz-title">${opts}</div>${feedback}<div class="study-actions"><span class="action-hint">${hint}</span>${action}</div></section>`;
-  $('bz-quit').onclick=home;
+<section class="bz-hud"><div class="bz-score"><b>${blitz.score}</b><small>điểm · ${RANKS[rankIndex(blitz.score)][1]}</small></div><div class="bz-combo ${blitz.combo>=3?'hot':''} ${blitz.combo>=10?'blaze':''}">${blitz.combo>=3?'🔥 ':''}Combo ${blitz.combo}<i>×${mult}</i></div><button class="secondary bz-end" id="bz-end" type="button">Kết thúc &amp; xem kết quả</button></section>
+<section class="study-card bz-card ${fb==='wrong'?'shake':''} ${fb==='correct'?'pop':''}"><div class="question-meta"><span>Câu ${blitz.pos+1}/${blitz.queue.length} · Chương ${q.chapter}</span><span>·</span><span class="${multi?'multi-tag':''}">${multi?'Chọn '+q.correct.length+' đáp án':'Chọn một đáp án'}</span></div><h1 class="question" id="bz-title">${escapeHTML(q.question)}</h1><div class="options" role="group" aria-labelledby="bz-title">${opts}</div>${feedback}<div class="study-actions"><span class="action-hint">${hint}</span>${action}</div></section>`;
+  $('bz-quit').onclick=home;$('bz-end').onclick=blitzOver;
   app.querySelectorAll('[data-bz]').forEach(b=>b.onclick=()=>blitzChoose(b.dataset.bz));
-  if($('bz-check'))$('bz-check').onclick=()=>blitzGrade(false);
+  if($('bz-check'))$('bz-check').onclick=blitzGrade;
   if($('bz-next'))$('bz-next').onclick=blitzNext;
 }
 function blitzChoose(L){
   if(!blitz||blitz.phase!=='q'||blitz.feedback)return;
   const q=blitzQ();if(L.charCodeAt(0)-65>=q.options.length)return;
   unlockAudio();
-  if(q.correct.length===1){blitz.selected=[L];blitzGrade(false);return;}
+  if(q.correct.length===1){blitz.selected=[L];blitzGrade();return;}
   blitz.selected=blitz.selected.includes(L)?blitz.selected.filter(x=>x!==L):[...blitz.selected,L];
   renderBlitz();
 }
 function hurtFlash(){document.body.classList.remove('bz-hurt');void document.body.offsetWidth;document.body.classList.add('bz-hurt');setTimeout(()=>document.body.classList.remove('bz-hurt'),600);}
 function toast(text){const t=document.createElement('div');t.className='bz-toast';t.setAttribute('role','status');t.textContent=text;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
-function blitzGrade(timeout){
+function blitzGrade(){
   if(!blitz||blitz.phase!=='q'||blitz.feedback)return;
-  if(!timeout&&blitz.selected.length!==blitzQ().correct.length)return;
-  stopBlitzTimers();
-  const q=blitzQ(),ok=!timeout&&sameSet(blitz.selected,q.correct);
-  blitz.timeout=timeout;blitz.answered++;blitz.healed=false;
+  const q=blitzQ();if(blitz.selected.length!==q.correct.length)return;
+  const ok=sameSet(blitz.selected,q.correct);
+  blitz.answered++;
   if(ok){
-    const left=Math.max(0,blitz.deadline-performance.now())/1000;
     blitz.combo++;blitz.maxCombo=Math.max(blitz.maxCombo,blitz.combo);blitz.right++;
-    blitz.gain=Math.round((100+left*10)*multiplier(blitz.combo));blitz.score+=blitz.gain;blitz.feedback='correct';
-    if(blitz.combo%10===0&&blitz.hearts<BLITZ_HEARTS){blitz.hearts++;blitz.healed=true;}
+    blitz.gain=Math.round(BASE_POINTS*multiplier(blitz.combo));blitz.score+=blitz.gain;blitz.feedback='correct';
     if(db.blitzWrong.includes(q.id)||wrongIds().includes(q.id)){db.blitzWrong=db.blitzWrong.filter(id=>id!==q.id);if(!db.blitzFixed.includes(q.id))db.blitzFixed.push(q.id);}
   }else{
-    blitz.combo=0;blitz.hearts--;blitz.feedback='wrong';blitz.wrong.push(q.id);
+    blitz.combo=0;blitz.feedback='wrong';blitz.wrong.push(q.id);
     if(!db.blitzWrong.includes(q.id))db.blitzWrong.push(q.id);
     db.blitzFixed=db.blitzFixed.filter(id=>id!==q.id);
   }
   save();tone(ok);if(!ok)hurtFlash();
   renderBlitz();
-  say(ok?`Đúng, cộng ${blitz.gain} điểm.`:`${timeout?'Hết giờ':'Sai'}. Đáp án ${q.correct.join(', ')}. Còn ${blitz.hearts} mạng.`);
+  say(ok?`Đúng, cộng ${blitz.gain} điểm.`:`Sai. Đáp án ${q.correct.join(', ')}.`);
   if(ok){
     const lv=rankIndex(blitz.score);
     if(lv>blitz.level){blitz.level=lv;toast('⬆ Lên cấp: '+RANKS[lv][1]);fanfare();}
@@ -583,7 +553,7 @@ function blitzGrade(timeout){
 }
 function blitzNext(){
   cancel();if(!blitz||blitz.phase!=='q'||!blitz.feedback)return;
-  if(blitz.hearts<=0||blitz.pos+1>=blitz.queue.length){blitzOver();return;}
+  if(blitz.pos+1>=blitz.queue.length){blitzOver();return;}
   blitz.pos++;
   if(blitz.answered%BREAK_EVERY===0){wakeBreak();return;}
   blitzQuestion();
@@ -591,7 +561,7 @@ function blitzNext(){
 function wakeBreak(){
   stopBlitzTimers();blitz.phase='break';
   const task=WAKE_TASKS[Math.floor(Math.random()*WAKE_TASKS.length)];let left=BREAK_SECONDS;
-  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Thoát</button><span class="pill">⚡ Đấu nhanh · nghỉ giữa hiệp</span></div><section class="summary-card bz-break"><div class="medallion" aria-hidden="true">🏃</div><div class="eyebrow" style="justify-content:center">Nhiệm vụ tỉnh táo · ${BREAK_SECONDS} giây</div><h1>${task}</h1><div class="bz-break-count" id="bz-break" aria-live="off">${left}</div><p>${blitz.answered} câu · ${blitz.score} điểm · ${'♥'.repeat(blitz.hearts)} · combo ${blitz.combo} vẫn được giữ</p><div class="bz-actions"><button class="primary" id="bz-resume">Xong, chiến tiếp ⚡</button></div></section>`;
+  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Thoát</button><span class="pill">⚡ Đấu nhanh · nghỉ giữa hiệp</span></div><section class="summary-card bz-break"><div class="medallion" aria-hidden="true">🏃</div><div class="eyebrow" style="justify-content:center">Nhiệm vụ tỉnh táo · ${BREAK_SECONDS} giây</div><h1>${task}</h1><div class="bz-break-count" id="bz-break" aria-live="off">${left}</div><p>${blitz.answered} câu · ${blitz.score} điểm · combo ${blitz.combo} vẫn được giữ</p><div class="bz-actions"><button class="primary" id="bz-resume">Xong, chiến tiếp ⚡</button></div></section>`;
   $('bz-quit').onclick=home;$('bz-resume').onclick=blitzResume;top();
   say('Nghỉ giữa hiệp: '+task);
   breakTick=setInterval(()=>{
@@ -601,12 +571,13 @@ function wakeBreak(){
 }
 function blitzResume(){if(!blitz||blitz.phase!=='break')return;stopBlitzTimers();blitzQuestion();}
 function blitzOver(){
+  if(!blitz||blitz.phase==='over')return;
   stopBlitzTimers();cancel();blitz.phase='over';
   const best=blitz.score>db.blitzBest;if(best){db.blitzBest=blitz.score;}
   db.blitzRuns=(db.blitzRuns||0)+1;save();
-  const acc=blitz.answered?Math.round(blitz.right/blitz.answered*100):0,cleared=blitz.hearts>0;
+  const acc=blitz.answered?Math.round(blitz.right/blitz.answered*100):0;
   const wrongList=[...new Set(blitz.wrong)].map(id=>byId.get(id)).filter(Boolean);
-  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Các phần ôn tập</button><span class="pill">⚡ Kết quả đấu nhanh</span></div><section class="summary-card"><div class="medallion" aria-hidden="true">${best?'🏆':cleared?'✓':'💤'}</div><div class="eyebrow" style="justify-content:center">${best?'Kỷ lục mới!':cleared?'Hết câu rồi, bạn vẫn sống sót':'Hết mạng rồi'}</div><h1>${blitz.score} điểm</h1><p>Cấp độ: <b>${RANKS[rankIndex(blitz.score)][1]}</b><br>Kỷ lục: ${db.blitzBest} điểm</p><div class="summary-metrics"><div><b>${blitz.right}/${blitz.answered}</b><span>Câu đúng · ${acc}%</span></div><div><b>${blitz.maxCombo}</b><span>Combo cao nhất</span></div></div><div class="bz-actions"><button class="secondary" id="bz-home">Về trang chính</button><button class="primary" id="bz-again">↻ Chơi lại</button></div>${wrongList.length?`<div class="bz-wrong"><h2>Các câu sai lượt này (${wrongList.length})</h2><p>Đã lưu vào bộ “Câu từng làm sai” để bạn đấu lại sau.</p>${wrongList.map(q=>`<details class="review-item"><summary>Chương ${q.chapter} · ${escapeHTML(q.question)}</summary><p><b>${q.correct.map(L=>`${L}. ${escapeHTML(q.options[L.charCodeAt(0)-65]||'')}`).join('<br>')}</b></p>${q.review?.explanation?`<p>${escapeHTML(q.review.explanation)}</p>`:''}</details>`).join('')}</div>`:''}</section>`;
+  app.innerHTML=`<div class="learn-top"><button class="back" id="bz-quit">← Các phần ôn tập</button><span class="pill">⚡ Kết quả đấu nhanh</span></div><section class="summary-card"><div class="medallion" aria-hidden="true">${best?'🏆':'✓'}</div><div class="eyebrow" style="justify-content:center">${best?'Kỷ lục mới!':'Kết thúc lượt đấu'}</div><h1>${blitz.score} điểm</h1><p>Cấp độ: <b>${RANKS[rankIndex(blitz.score)][1]}</b><br>Kỷ lục: ${db.blitzBest} điểm</p><div class="summary-metrics"><div><b>${blitz.right}/${blitz.answered}</b><span>Câu đúng · ${acc}%</span></div><div><b>${blitz.maxCombo}</b><span>Combo cao nhất</span></div></div><div class="bz-actions"><button class="secondary" id="bz-home">Về trang chính</button><button class="primary" id="bz-again">↻ Chơi lại</button></div>${wrongList.length?`<div class="bz-wrong"><h2>Các câu sai lượt này (${wrongList.length})</h2><p>Đã lưu vào bộ “Câu từng làm sai” để bạn đấu lại sau.</p>${wrongList.map(q=>`<details class="review-item"><summary>Chương ${q.chapter} · ${escapeHTML(q.question)}</summary><p><b>${q.correct.map(L=>`${L}. ${escapeHTML(q.options[L.charCodeAt(0)-65]||'')}`).join('<br>')}</b></p>${q.review?.explanation?`<p>${escapeHTML(q.review.explanation)}</p>`:''}</details>`).join('')}</div>`:''}</section>`;
   $('bz-quit').onclick=home;$('bz-home').onclick=home;$('bz-again').onclick=()=>startBlitz(blitz.src);
   if(best){fanfare();confetti();}
   say(`Kết thúc. ${blitz.score} điểm, đúng ${blitz.right} trên ${blitz.answered} câu.`);top();
@@ -618,7 +589,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     if(blitz.phase==='break')blitzResume();
     else if(blitz.phase==='q'&&blitz.feedback==='wrong')blitzNext();
-    else if(blitz.phase==='q'&&!blitz.feedback)blitzGrade(false);
+    else if(blitz.phase==='q'&&!blitz.feedback)blitzGrade();
     return;
   }
   if(blitz.phase!=='q'||blitz.feedback)return;
